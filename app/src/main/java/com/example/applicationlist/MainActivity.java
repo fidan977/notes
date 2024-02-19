@@ -1,16 +1,23 @@
 package com.example.applicationlist;
 
+
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -42,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
 
 
-
+    private String[] actions=new String[] {"удалить","отменить"};
     boolean fast_klick= false;
 
     @Override
@@ -54,6 +61,73 @@ public class MainActivity extends AppCompatActivity {
         listView=findViewById(R.id.listView);
 
 
+        load_doc_list();
+
+
+        Dialog dialog = new Dialog(this);
+
+        dialog.show();
+
+
+        //full_window();
+    }
+
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        System.out.println("пауза");
+
+
+        finish();
+
+    }
+
+    private void showPopupMenu(View v,String pos) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.inflate(R.menu.popupmenu);
+
+        popupMenu
+                .setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+
+
+                        //Toast.makeText(getApplicationContext(), "Выбор="+item, Toast.LENGTH_SHORT).show();
+
+                        //Toast.makeText(getApplicationContext(), "Выбор="+R.id.menu1, Toast.LENGTH_SHORT).show();
+
+
+
+                        if(item.getItemId()==R.id.menu1){
+
+                            File file = new File(pos);
+                            boolean deleted = file.delete();
+
+                            load_doc_list();
+                            Toast.makeText(getApplicationContext(), "Удалено", Toast.LENGTH_SHORT).show();
+                        }
+                        if(item.getItemId()==R.id.menu2){
+
+                            Toast.makeText(getApplicationContext(), "Функция еще не добавлена", Toast.LENGTH_SHORT).show();
+                        }
+
+                                return false;
+
+                    }
+                });
+        popupMenu.show();
+
+    }
+
+    public void full_window() {
+
+        Window w =getWindow();
+        w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+    }
+    public void load_doc_list(){
         number_text=read_config(1);
 
 
@@ -66,18 +140,6 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("загрузка имеющихся документов");
             set_list(b);
         }
-
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        System.out.println("пауза");
-
-
-        finish();
-
     }
 
     public void set_date(){
@@ -148,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
         //MainActivity2.load_doc(v);
         Intent intent= new Intent(this,MainActivity2.class);
-        intent.putExtra("number_text",number_text);
+        intent.putExtra("number_text",1);
         intent.putExtra("full_name_doc",full_name_doc);
         startActivity(intent);
 
@@ -330,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+
                 System.out.println(fast_klick);
                 if(fast_klick){
                     System.out.println(id);
@@ -342,6 +405,23 @@ public class MainActivity extends AppCompatActivity {
                     set_doc(listView,listArr[position]);
                 }else {
                     System.out.println("было зажатие");
+
+
+                    System.out.println("адрес выделенного докумета для оперций="+listArr[position]);
+
+
+                    System.out.println("выбор действия");
+
+                    showPopupMenu(view,listArr[position]);
+
+                    if(false){
+
+                        File file = new File(listArr[position]);
+                        boolean deleted = file.delete();
+
+                        load_doc_list();
+                    }
+
                 }
 
 
@@ -360,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
 
 
-                System.out.println("нажал");
+                //System.out.println("нажал");
 
 
 
